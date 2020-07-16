@@ -1,8 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
+	"regexp"
+)
+
+var (
+	r = regexp.MustCompile("\\(+|\\)+|\\{+|\\}+|\\[+|\\]+")
 )
 
 /*
@@ -18,51 +22,67 @@ import (
 */
 
 func main() {
-	fmt.Println("Test", isBalanced("[jhghjg]"))
-
+	fmt.Println("Test", isBalanced(")("))
+	// foundSlice := r.FindAllString("l(kj{lj", 10)
+	// fmt.Println(len(foundSlice), foundSlice)
 }
 
 var (
-	opened = []byte{40, 123, 91}
-	close  = []byte{41, 125, 93}
+	opened = []string{"(", "{", "["}
+	closed = []string{")", "}", "]"}
 )
 
 func isBalanced(str string) bool {
-	retValue := false
-	strAsByte := []byte(str)
-	start, end := initTheCurlyPosition()
-
-	// fill all
-	for i := 0; i < len(str); i++ {
-		cuurentStart := false
-		currendEnd := false
-		if bytes.Contains(opened, byte(strAsByte[i])) {
-			cuurentStart = true
-			setTheCurlyPosition(start, strAsByte[i], i)
-		}
-		if bytes.Contains(close, byte(strAsByte[i])) {
-			currendEnd = true
-			setTheCurlyPosition(end, strAsByte[i], i)
-		}
+	retValue := true
+	// Step 1 define is bracets in the string
+	foundSlice := r.FindAllString(str, len(str))
+	totalBracets := len(foundSlice)
+	fmt.Println("Found bracets ", foundSlice)
+	fmt.Println("Found totalBracets ", totalBracets)
+	if totalBracets == 0 {
+		fmt.Println("No bracets")
+		return false
 	}
-	// TODO go trough the slices and check....
+	// Non balanced
+	isOdd := totalBracets % 2
+	fmt.Println("isOdd, ", isOdd)
+	stackToHold := make(chan string, totalBracets)
+	defer close(stackToHold)
+	if isOdd != 0 {
+		return false
+	} else {
+		for _, v := range foundSlice {
+			fmt.Println("v ", v)
+			if contains(opened, v) {
+				stackToHold <- v
+			} else if contains(closed, v) {
+				topValue, _ := <-stackToHold
 
+				if (topValue == "(" && v == ")") ||
+					(topValue == "{" && v == "}") ||
+					(topValue == "[" && v == "]") {
+					fmt.Println("topValue equals")
+				} else {
+					fmt.Println("topValue not equals")
+					return false
+				}
+			}
+		}
+		// // check the stack
+		// rest := <-stackToHold
+		// if "" == rest {
+		// 	return true
+		// }
+
+	}
 	return retValue
 }
 
-// The key is ascci code of braket, pos - new
-func setTheCurlyPosition(inMap map[int][]int, key, pos int) {
-	inMap[key] = append(inMap[key], pos)
-}
-
-func initTheCurlyPosition() (map[int][]int, map[int][]int) {
-	start := make(map[int][]int, 3)
-	end := make(map[int][]int, 3)
-	start[40] = []int{}
-	start[123] = []int{}
-	start[91] = []int{}
-	end[41] = []int{}
-	end[125] = []int{}
-	end[93] = []int{}
-
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
