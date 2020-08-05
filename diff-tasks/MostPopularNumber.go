@@ -18,6 +18,7 @@ func MostPopularNumber(sourceSlice []int64, sourceLngth int) int64 {
 	}
 	// use for store the result
 	storeMap := make(map[int64]int, 0)
+	// get the count
 	for _, value := range sourceSlice {
 		v, ok := storeMap[value]
 		if ok {
@@ -26,6 +27,7 @@ func MostPopularNumber(sourceSlice []int64, sourceLngth int) int64 {
 			storeMap[value] = 1
 		}
 	}
-	fmt.Println(storeMap)
+	// TODO go through the map keys and values and decode wich one is...
+
 	return 0
 }

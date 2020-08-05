@@ -22,7 +22,7 @@ var (
 */
 
 func main() {
-	fmt.Println("Test", isBalanced(")("))
+	fmt.Println("Test", isBalanced("{()}"))
 	// foundSlice := r.FindAllString("l(kj{lj", 10)
 	// fmt.Println(len(foundSlice), foundSlice)
 }
@@ -56,7 +56,13 @@ func isBalanced(str string) bool {
 			if contains(opened, v) {
 				stackToHold <- v
 			} else if contains(closed, v) {
-				topValue, _ := <-stackToHold
+				topValue := ""
+				select {
+				case c := <-stackToHold:
+					topValue = c
+				default:
+					topValue = ""
+				}
 
 				if (topValue == "(" && v == ")") ||
 					(topValue == "{" && v == "}") ||
